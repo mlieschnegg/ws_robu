@@ -9,8 +9,8 @@
 				"--merge-install",
 				"--event-handlers",
 				"console_cohesion+",
-				"--base-paths",
-				"c:\\ws\\ws_robu",
+				//"--base-paths",
+				//"c:\\ws\\ws_robu",
 				"--cmake-args",
 				"-DCMAKE_BUILD_TYPE=RelWithDebInfo"
 			],
