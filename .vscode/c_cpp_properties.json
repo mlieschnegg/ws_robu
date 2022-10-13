@@ -1,0 +1,15 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "C:\\dev\\ros2_humble\\include\\**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

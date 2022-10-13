@@ -1,0 +1,16 @@
+{
+    "ros.distro": "humble",
+    "ros.rosSetupScript": "C:\\dev\\ros2_humble\\setup.bat",
+    "python.autoComplete.extraPaths": [
+        "c:\\ws\\ws_robu\\install\\Lib\\site-packages",
+        "C:\\ws\\ws_robu\\install\\Lib\\site-packages",
+        "C:\\ci\\ws\\install\\lib\\python3.8\\dist-packages",
+        "C:\\dev\\ros2_humble\\Lib\\site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "c:\\ws\\ws_robu\\install\\Lib\\site-packages",
+        "C:\\ws\\ws_robu\\install\\Lib\\site-packages",
+        "C:\\ci\\ws\\install\\lib\\python3.8\\dist-packages",
+        "C:\\dev\\ros2_humble\\Lib\\site-packages"
+    ],
+}
