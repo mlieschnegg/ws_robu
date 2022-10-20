@@ -1,7 +1,7 @@
-#Exercise: Mein Erster Node - Fernsteuerung des Roboters
-#Group: 1
-#Class: 4BHME
-#Date: 13.10.2022
+#Exercise Title:    Remote Control for the TurtleBot3 Burger
+#Group:             ?
+#Class:             ?
+#Date:              ?
 
 import rclpy
 
