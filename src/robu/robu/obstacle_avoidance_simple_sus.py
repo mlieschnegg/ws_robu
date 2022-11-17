@@ -69,7 +69,7 @@ class ObastacleAvoidanceSimple(Node):
         if self.scan == None:
             return False, 0.0
         
-        #Berechnung der Segmentanzahl
+        #Berechnung der Segmentanzahl...
         segment_size = int(360 / self.REGIONAL_ANGLE_DEG + 0.5)
         segment_distance_size = int(len(self.scan.ranges) / segment_size)
 
