@@ -23,12 +23,17 @@ class ObastacleAvoidanceSimple(Node):
         ** Initialise variables
         ************************************************************"""
 
-        self.REGIONAL_ANGLE_DEG = regional_angle_deg
-        self.NORMAL_LIN_VEL = normal_lin_vel
-        self.TRANS_LIN_VEL = trans_lin_vel
-        self.OBSTACLE_DIST = 0.3 #Meter
+        self.scan = None
         
-        #.....
+        self.REGIONAL_ANGLE_DEG = regional_angle_deg
+        self.OBSTACLE_DIST = 0.3
+
+        self.NORMAL_LIN_VEL = normal_lin_vel
+        self.TRANS_LIN_VEL  = trans_lin_vel
+        self.TRANS_ANG_VEL  = trans_ang_vel
+
+                
+        self.vel_obj = Twist()
 
         """************************************************************
         ** Initialise ROS publishers and subscribers
@@ -36,11 +41,11 @@ class ObastacleAvoidanceSimple(Node):
         qos = QoSProfile(depth=10)
 
         # Initialise publishers - use method create_publisher
-        
-        self.vel_obj = self.create_publisher(Twist, 'cmd_vel', qos)
+
+        self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', qos)
 
         # Initialise subscribers - use method create_subscription
-        self.scan_obj = self.create_subscription(LaserScan, 'scan', 
+        self.cmd_scan_sub = self.create_subscription(LaserScan, 'scan', 
                             self.scan_callback, qos_profile_sensor_data)
                             
         
@@ -60,57 +65,65 @@ class ObastacleAvoidanceSimple(Node):
 
 
     def obstacle_avoidance(self):
+
+        if self.scan == None:
+            return False, 0.0
+        
         #Berechnung der Segmentanzahl
+        segment_size = int(360 / self.REGIONAL_ANGLE_DEG + 0.5)
+        segment_distance_size = int(len(self.scan.ranges) / segment_size)
 
-        segment_size = 360 / self.REGIONAL_ANGLE_DEG
+        #Die Suchpriorisierung festelegen. Das Array enthält die Nummern der Segmente
+        #segement_order = [0, 1, 6, 2, 5, 3, 4] #.....
+        segment_order = [0] * segment_size
+        for i in range(int((segment_size)/2)):
+            segment_order[2*i] = i
+            segment_order[2*i+1] = segment_size-i-1
+        segment_order[-1] = int((segment_size)/2)
 
-        segment_distance_size = len(self.scan.ranges) / segment_size
-
-        #segment_order = segment_size * [0]
-
-        segement_order = [0, 1, 6, 2, 5, 3, 4] #.....
-
-
-        distances = self.scan.ranges[-segment_distance_size/2:] + self.scan.ranges[0:segment_distance_size/2]
-
-        self.segment[0] = [ x for x in distances if (x < self.OBSTACLE_DIST) and (x != 'inf')]
-
-        end = segment_distance_size/2
-        for i in range(1, segment_size):
+        #Bestimmung welche Regionen Abstandsverletzungen enthält. 
+        #D.h. das Array nach Abständen < self.OBSTACLE_DIST filtern
+        segment_distances = segment_size * [[]]      #Array mit leeren Feldern je Segment erstellen 
+        begin = -int(segment_distance_size/2)
+        end = begin + segment_distance_size
+        distances = self.scan.ranges[begin : ] + self.scan.ranges[ : end]
+        #Abstandsverletzung vor dem Roboter = Segment 0 filtern/berechnen
+        segment_distances[0] = [x for x in distances if x <= self.OBSTACLE_DIST and x != 'inf']
+        #Abstandsverletzungen in den restlichen Segmenten suchen
+        for i in range(1,segment_size):
             begin = end
             end = begin + segment_distance_size
-            distances = self.scan.ranges[begin:end]
-            self.segment[i] = [ x for x in distances if (x < self.OBSTACLE_DIST) and (x != 'inf')]
-
-        #ToDo
-        #Beste Ausweichroute suchen
-        #Siehe 3. Flussdiagramm
-        #Segement nach Priorität durchsuchen
+            distances = self.scan.ranges[begin : end]
+            segment_distances[i] = [x for x in distances if (x <= self.OBSTACLE_DIST) and (x != 'inf')]
+        
+        #TODO - Beste Ausweichroute suchen - Siehe 3. Flussdiagramm
+        #Segement in der Reihenfolge ihrer Priorität durchsuchen -> segment_order
+        #Leere Segmente werden bevorzugt (keine Hindernisse), wenn keine Leeren Segmente gefunden werden,
+        #könnte der Robot das Segment mit den größen Absthänden anfahren
 
         #Rückgabewert -> Freies Segment oder Beste Ausweichmöglichkeit
         # return segmentnr, z_vel_angular
 
+
+        #TODO - Berechnung der Drehgeschwindigkeit
+        #0.0 rad/s, -xx rad/s, +xx rad/s
+
+        #TODO - Rückgabe des Ausweichsegments und der Drehgeschindigkeit
+        #return ....
+
     def steer(self, steer=False, ang_vel=0.0):
-        #set lineara and angular speed
-
-        vel = Twist()
         if not steer:
-            vel.linear.x = self.NORMAL_LIN_VEL
-            vel.angular.z = 0
+            self.vel_obj.linear.x = self.NORMAL_LIN_VEL
         else:
-            vel.linear.x = self.TRANS_LIN_VEL
-            vel.angular.z = ang_vel
-        
-        vel.linear.y = 0
-        vel.linear.z = 0
-        vel.angular.x = 0
-        vel.angular.y = 0
+            self.vel_obj.linear.x = self.TRANS_LIN_VEL
+        self.vel_obj.linear.y  = 0.0
+        self.vel_obj.linear.z  = 0.0
+        self.vel_obj.angular.x = 0.0
+        self.vel_obj.angular.y = 0.0
+        self.vel_obj.angular.z = ang_vel
 
-        self.vel_obj.publish(vel)
+        self.cmd_vel_pub.publish(self.vel_obj)
 
-
-        #publish the cmd_vel topic to the other ros nodes
-        pass
     def __del__(self):
         pass
         

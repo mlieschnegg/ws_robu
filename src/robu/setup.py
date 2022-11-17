@@ -23,7 +23,8 @@ setup(
             'helloworld = robu.helloworld:main',
             'remotectrl = robu.remotectrl:main',
             'remotectrl_listener = robu.remotectrl_listener:main',
-            'remotectrl_sus = robu.remotectrl_sus:main'
+            'remotectrl_sus = robu.remotectrl_sus:main',
+            'obstacle_avoidance_simple = robu.obstacle_avoidance_simple:main'
         ],
     },
 )
